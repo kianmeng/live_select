@@ -19,12 +19,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - elixir: '1.14.1'
-            otp: '25.0'
-          - elixir: '1.15.0'
-            otp: '26.0'
-          - elixir: '1.16.0'
-            otp: '26.0'
+          - elixir: '1.14'
+            otp: '25'
+          - elixir: '1.17'
+            otp: '27'
+            lint: true
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,17 +40,21 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies
         run: mix deps.get
+
       - name: Compile with warnings
-        if: ${{ matrix.elixir == env.ELIXIR_LATEST}}
+        if: ${{ matrix.lint }}
         run: mix compile --warnings-as-errors
+
       - name: Compile without warnings
-        if: ${{ matrix.elixir != env.ELIXIR_LATEST}}
         run: mix compile
+
       - name: Check format
         run: mix format --check-formatted
-        if: ${{ matrix.elixir == env.ELIXIR_LATEST}}
+        if: ${{ matrix.lint}}
+
       - name: Credo
         run: mix credo
-        if: ${{ matrix.elixir == env.ELIXIR_LATEST}}
+        if: ${{ matrix.lint}}
+
       - name: Run tests
         run: mix test
